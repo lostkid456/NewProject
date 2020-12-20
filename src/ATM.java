@@ -1,8 +1,5 @@
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//import java.io.BufferedWriter;
-//import java.io.FileWriter;
 import java.util.*;
 import javax.swing.*;
 import java.io.*;
@@ -12,7 +9,7 @@ import java.io.*;
  */
 public class ATM{
 
-    private final Bank bank=new Bank();
+    private static final Bank bank=new Bank();
     private final JFrame ATMframe = new JFrame("ATM");
     private JFrame AccountFrame;
     private JLabel CardNumberLabel;
@@ -81,7 +78,7 @@ public class ATM{
      * Makes random users for us to manage
      *
      */
-    public void SetupRandomBank() {
+    private void SetupRandomBank() {
         ArrayList<User> users=new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             int leftLimit = 97; // letter 'a'
@@ -133,15 +130,8 @@ public class ATM{
         bank.setUsers(users);
     }
 
-    
 
-//    public void UpdateBank() throws IOException {
-//        File file=new File("Bank.txt");
-//        BufferedWriter writer=new BufferedWriter(new FileWriter(file));
-//        for(User user:bank.getUsers()){
-//            writer.write(user.toString());
-//        }
-//    }
+
 
 
     /**
@@ -149,7 +139,7 @@ public class ATM{
      * @param atm
      * The atm we are using
      */
-    public void ATMStartup(ATM atm) {
+    private void ATMStartup(ATM atm) {
 
         ATMframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ATMframe.setSize(250, 250);
@@ -175,6 +165,7 @@ public class ATM{
         ATMframe.setVisible(true);
 
     }
+
 
 
     /**
@@ -225,7 +216,7 @@ public class ATM{
      * @param atm
      * The atm we are using
      */
-    public void Withdraw(User user,ATM atm){
+    void Withdraw(User user, ATM atm){
         AccountFrame.setVisible(false);
         WithdrawFrame=new JFrame(user.getName()+ " Withdraw");
         WithdrawFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -250,7 +241,7 @@ public class ATM{
      * @param atm
      * THe atm in use
      */
-    public void Deposit(User user,ATM atm){
+    void Deposit(User user, ATM atm){
         AccountFrame.setVisible(false);
         DepositFrame=new JFrame(user.getName()+ " Deposit");
         DepositFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -319,15 +310,26 @@ public class ATM{
     }
 
     /**
+     * Writes the state of the bank into a file
+     */
+    static void WriteBacktoFile() throws IOException {
+        BufferedWriter writer=new BufferedWriter(new FileWriter("Bank" +
+                                                                        ".txt"));
+        for(User user:bank.getUsers()){
+            writer.write(user.toString()+"\n");
+        }
+        writer.close();
+    }
+
+    /**
      * Used to simulate our ATM mangement simulator
      * @param args
      */
-    public static void main(String... args)  {
-        ATM atm=new ATM();
+    public static void main(String... args) throws IOException {
+        ATM atm = new ATM();
         atm.SetupRandomBank();
-        System.out.println(atm.bank.toString());
+        WriteBacktoFile();
         atm.ATMStartup(atm);
-//        atm.UpdateBank();
     }
 
 }
@@ -343,10 +345,6 @@ class ATMListener implements java.awt.event.ActionListener {
         this.atm=atm;
     }
 
-    /**
-     *
-     * @param e
-     */
     @Override
     public void actionPerformed(ActionEvent e) {
         boolean found=false;
@@ -387,11 +385,6 @@ class WithdrawListener implements ActionListener{
         this.user=user;
     }
 
-    /**
-     * Goes the the withdraw method when button is pressed for Withdraw
-     * @param e
-     * The action of pressing withdraw
-     */
     @Override
     public void actionPerformed(ActionEvent e) {
         atm.Withdraw(user,atm);
@@ -447,6 +440,11 @@ class QuitListener implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        try {
+            ATM.WriteBacktoFile();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
         atm.getAccountFrame().setVisible(false);
         atm.getCardNumberText().setText("");
         atm.getATMframe().setVisible(true);
