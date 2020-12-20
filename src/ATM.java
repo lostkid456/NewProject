@@ -310,10 +310,21 @@ public class ATM{
     }
 
     /**
-     * Writes the state of the bank into a file
+     * Writes the original state of the bank into a file
      */
     static void WriteBacktoFile() throws IOException {
         BufferedWriter writer=new BufferedWriter(new FileWriter("Bank" +
+                                                                        ".txt"));
+        for(User user:bank.getUsers()){
+            writer.write(user.toString()+"\n");
+        }
+        writer.close();
+    }
+    /**
+     * Writes the updated state into another file
+     */
+    static void UpdateBank() throws IOException{
+        BufferedWriter writer=new BufferedWriter(new FileWriter("UpdatedBank" +
                                                                         ".txt"));
         for(User user:bank.getUsers()){
             writer.write(user.toString()+"\n");
@@ -441,7 +452,7 @@ class QuitListener implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            ATM.WriteBacktoFile();
+            ATM.UpdateBank();
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
