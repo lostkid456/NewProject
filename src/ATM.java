@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.io.*;
 
 /**
- * The ATM management simulation we will run
+ * The ATM management simulation we will run. Implements Serializable
  */
 public class ATM implements Serializable{
 
