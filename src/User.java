@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * This class is for creating a User for our mock ATM system
  */
-public class User {
+public class User implements Serializable {
     private String name;
     private int card_number;
     private String pin_number;

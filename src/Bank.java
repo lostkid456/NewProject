@@ -1,9 +1,10 @@
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * The bank containing all accounts
  */
-public class Bank {
+public class Bank implements Serializable {
 
     private List<User>users=new ArrayList<>();
 

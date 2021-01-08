@@ -7,9 +7,9 @@ import java.io.*;
 /**
  * The ATM management simulation we will run
  */
-public class ATM{
+public class ATM implements Serializable{
 
-    private static final Bank bank=new Bank();
+    private static Bank bank=new Bank();
     private final JFrame ATMframe = new JFrame("ATM");
     private JFrame AccountFrame;
     private JLabel CardNumberLabel;
@@ -78,56 +78,66 @@ public class ATM{
      * Makes random users for us to manage
      *
      */
-    private void SetupRandomBank() {
-        ArrayList<User> users=new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            int leftLimit = 97; // letter 'a'
-            int rightLimit = 122; // letter 'z'
-            int targetStringLength = 10;
-            Random random = new Random();
+    private void SetupRandomBank() throws IOException, ClassNotFoundException {
+        File f = new File("Bank.obj");
+        if(!f.exists()) {
+            ArrayList<User> users = new ArrayList<>();
+            for (int i = 0; i < 1000; i++) {
+                int leftLimit = 97; // letter 'a'
+                int rightLimit = 122; // letter 'z'
+                int targetStringLength = 10;
+                Random random = new Random();
 
-            String generatedString = random.ints(leftLimit, rightLimit + 1)
-                    .limit(targetStringLength)
-                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                    .toString();
-            while(true){
-                for(User user:bank.getUsers()){
-                    if(user.getName().equals(generatedString)){
-                        generatedString = random.ints(leftLimit, rightLimit + 1)
-                                .limit(targetStringLength)
-                                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                                .toString();
+                String generatedString = random.ints(leftLimit, rightLimit + 1)
+                        .limit(targetStringLength)
+                        .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                        .toString();
+                while (true) {
+                    for (User user : bank.getUsers()) {
+                        if (user.getName().equals(generatedString)) {
+                            generatedString = random.ints(leftLimit, rightLimit + 1)
+                                    .limit(targetStringLength)
+                                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                                    .toString();
+                        }
+                    }
+                    break;
+                }
+                int card_number = (int) ((Math.random() * 10000000) + 10000000);
+                while (true) {
+                    for (User user : bank.getUsers()) {
+                        if (user.getCard_number() == card_number) {
+                            card_number =
+                                    (int) ((Math.random() * 10000000) + 10000000);
+                        }
+                    }
+                    break;
+                }
+                int pin = (int) (Math.random() * 10000);
+                String str = "";
+                if (pin < 1000) {
+                    int temp = pin;
+                    while (temp < 1000) {
+                        temp *= 10;
+                        str += 0;
                     }
                 }
-                break;
+                String pin_num = str + Integer.toString(pin);
+                int checking = (int) (Math.random() * 100000);
+                int savings = (int) (Math.random() * 100000);
+                User user = new User(generatedString, card_number, pin_num, checking
+                        , savings);
+                users.add(user);
             }
-            int card_number = (int) ((Math.random() * 10000000)+10000000);
-            while(true){
-                for(User user:bank.getUsers()){
-                    if(user.getCard_number()==card_number){
-                        card_number =
-                                (int) ((Math.random() * 10000000)+10000000);
-                    }
-                }
-                break;
-            }
-            int pin = (int) (Math.random() * 10000);
-            String str = "";
-            if (pin < 1000) {
-                int temp = pin;
-                while (temp < 1000) {
-                    temp *= 10;
-                    str += 0;
-                }
-            }
-            String pin_num = str + Integer.toString(pin);
-            int checking = (int) (Math.random() * 100000);
-            int savings = (int) (Math.random() * 100000);
-            User user = new User(generatedString,card_number,pin_num,checking
-                    ,savings);
-            users.add(user);
+            bank.setUsers(users);
+        }else{
+            FileInputStream fileInputStream
+                    = new FileInputStream("Bank.obj");
+            ObjectInputStream objectInputStream
+                    = new ObjectInputStream(fileInputStream);
+            bank = (Bank) objectInputStream.readObject();
+            objectInputStream.close();
         }
-        bank.setUsers(users);
     }
 
 
@@ -330,13 +340,18 @@ public class ATM{
             writer.write(user.toString()+"\n");
         }
         writer.close();
+        FileOutputStream fileOutputStream
+                = new FileOutputStream("Bank.obj");
+        ObjectOutputStream objectOutputStream
+                = new ObjectOutputStream(fileOutputStream);
+        objectOutputStream.writeObject(bank);
     }
 
     /**
-     * Used to simulate our ATM mangement simulator
+     * Used to simulate our ATM management simulator
      * @param args
      */
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, ClassNotFoundException {
         ATM atm = new ATM();
         atm.SetupRandomBank();
         WriteBacktoFile();
